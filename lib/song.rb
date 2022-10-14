@@ -49,4 +49,34 @@ class Song
     song.save
   end
 
+  def self.new_from_db(row)
+    #self.new is equivalent to Song.new
+    self.new(id: row[0], name: row[1], album: row[2])
+  end
+
+  def self.all
+    # heredoc declaring the sql command
+    sql = <<-SQL
+      SELECT * FROM songs
+    SQL
+    # running the command and mapping over the array returned
+    DB[:conn].execute(sql).map do |row|
+      #providing each record from the database to a self.new method
+      self.new_from_db(row)
+    end
+  end
+
+  def self.find_by_name(name)
+    # sql command for finding the first matching song
+    sql = <<-SQL
+      SELECT * FROM songs
+      WHERE name = ? LIMIT 1
+    SQL
+    # connecting to the db and returning all results fromt the command
+    DB[:conn].execute(sql,name).map do |row|
+      self.new_from_db(row)
+    # the .first is chaining the returned array to return only the first element
+    end.first
+  end
+
 end
